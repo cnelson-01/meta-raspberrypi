@@ -1,16 +1,25 @@
 # short-description: Create Raspberry Pi SD card image with A/B partitions for OTA updates
 # long-description: Creates a partitioned SD card image with redundant A/B partitions for
 # robust OTA updates on Raspberry Pi.
-
 bootloader --ptable gpt
+
+# U-Boot partition - small but sufficient for the bootloader
+part --source rawcopy --sourceparams="file=u-boot.bin" --ondisk mmcblk0 --offset 4096 --fixed-size 8 --no-table
 
 # Bootable A partition
 part /boot_a --source bootimg-partition --ondisk mmcblk0 --fstype=vfat --label boot_a --active --align 4096 --size 100
+
 # Root A partition
-part /root_a --source rootfs --ondisk mmcblk0 --fstype=ext4 --label root_a --align 4096 --size 11000
+part /root_a --source rootfs --ondisk mmcblk0 --fstype=ext4 --label root_a --align 4096 --size 10000
+
 # Bootable B partition 
 part /boot_b --source bootimg-partition --ondisk mmcblk0 --fstype=vfat --label boot_b --align 4096 --size 100
+
 # Root B partition
-part /root_b --source rootfs --ondisk mmcblk0 --fstype=ext4 --label root_b --align 4096 --size 11000
+part /root_b --source rootfs --ondisk mmcblk0 --fstype=ext4 --label root_b --align 4096 --size 10000
+
+# U-Boot environment partition - for storing boot variables
+part --fstype=vfat --label u-boot-env --align 4096 --size 4
+
 # Persistent data partition
 part /data --ondisk mmcblk0 --fstype=ext4 --label data --align 4096 --size 3000
